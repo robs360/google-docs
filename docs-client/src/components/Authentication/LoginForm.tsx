@@ -4,14 +4,14 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
-import logo from '../assets/Google-Docs-Logo-2014.png'
-import google from '../assets/google.jpg'
+import logo from '../../assets/Google-Docs-Logo-2014.png'
+import google from '../../assets/google.jpg'
 
 const LoginForm = () => {
     const { register, handleSubmit } = useForm()
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
                 <div className="flex flex-col items-center">
                     <Image src={logo} width={56} height={40} alt="logo" className="mb-4" />
@@ -42,17 +42,7 @@ const LoginForm = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <input
-                                id="remember-me"
-                                name="remember-me"
-                                type="checkbox"
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                                Remember me
-                            </label>
-                        </div>
+                        
 
                         <div className="text-sm">
                             <Link href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
