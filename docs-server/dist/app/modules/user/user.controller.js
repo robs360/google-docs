@@ -15,8 +15,10 @@ const user_services_1 = require("./user.services");
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userData = req.body;
+        console.log(userData);
         const existingUser = yield user_model_1.userModel.findOne({ email: userData.email });
         if (existingUser) {
+            console.log("hello user has");
             res.status(400).json({
                 success: false,
                 message: "Email already used",
@@ -24,6 +26,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         else {
             const result = yield user_services_1.userServices.createUserIntoDB(userData);
+            console.log("hello ok");
             res.status(200).json({
                 success: true,
                 message: "User created successfully",
@@ -40,6 +43,25 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
 });
+const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userData = req.body;
+        const result = yield user_services_1.userServices.loginuserIntoDB(userData);
+        if (result.success) {
+            res.status(200).json(result);
+        }
+        else {
+            res.status(401).json(result);
+        }
+    }
+    catch (err) {
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: err
+        });
+    }
+});
 exports.userController = {
-    createUser
+    createUser, loginUser
 };

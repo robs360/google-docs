@@ -5,13 +5,43 @@ import { Button } from "../ui/button";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import logo from '../../assets/Google-Docs-Logo-2014.png'
+import { useState } from "react";
+import { uploadImageToImgBB } from "@/utils/imgbb";
+import { useRouter } from 'next/navigation';
+import { registerUser } from '@/app/actions/authentication';
 
 const RegisterForm = () => {
     const { register, handleSubmit, setValue } = useForm();
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
-    const onSubmit = (data:any) => {
-        console.log(data);
-        // Handle form submission
+    const onSubmit = async (data: any) => {
+        try {
+            setIsLoading(true);
+            let imageUrl = '';
+
+            if (data.image) {
+                imageUrl = await uploadImageToImgBB(data.image);
+            }
+           
+            const result = await registerUser({
+                name: data.name,
+                email: data.email,
+                password: data.password,
+                image: imageUrl
+            });
+            console.log("it is result ",result)
+            if (result.success) {
+                router.push('/login');
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            // Handle error (show error message to user)
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -31,7 +61,7 @@ const RegisterForm = () => {
                             <input
                                 type="text"
                                 {...register("name", { required: true })}
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Full name"
                                 required
                             />
@@ -40,7 +70,7 @@ const RegisterForm = () => {
                             <input
                                 type="email"
                                 {...register("email", { required: true })}
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Email address"
                                 required
                             />
@@ -49,7 +79,7 @@ const RegisterForm = () => {
                             <input
                                 type="password"
                                 {...register("password", { required: true, minLength: 6 })}
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Password (minimum 6 characters)"
                                 required
                             />
@@ -58,10 +88,12 @@ const RegisterForm = () => {
                             <input
                                 type="file"
                                 accept="image/*"
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded relative block w-full px-3 py-3 border border-gray-300 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
-                                    setValue("image", file);
+                                    if (file) {
+                                        setValue("image", file);
+                                    }
                                 }}
                             />
                         </div>
@@ -70,9 +102,10 @@ const RegisterForm = () => {
                     <div>
                         <Button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            disabled={isLoading}
                         >
-                            Create account
+                            {isLoading ? 'Creating account...' : 'Create account'}
                         </Button>
                     </div>
                 </form>
