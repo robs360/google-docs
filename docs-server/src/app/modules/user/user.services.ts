@@ -9,7 +9,7 @@ const createUserIntoDB=async (payload:TUser)=>{
 const loginuserIntoDB = async (payload: Partial<TUser>) => {
     const { email, password } = payload;
     const result = await userModel.findOne({ email: email });
-    console.log(result)
+    
     if (!result) {
         return {
             success: false,
@@ -20,7 +20,7 @@ const loginuserIntoDB = async (payload: Partial<TUser>) => {
     if (result.password === password) {
         const token = jwt.sign(
             { name: result.name, image: result.image, email: result.email },
-            "abcfeakljdfkl12@",
+            process.env.JWT_SECRET as string,
             { expiresIn: '7d' }
         );
         return {
