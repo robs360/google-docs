@@ -8,9 +8,9 @@ const CommonLayout =  ({ children }: { children: React.ReactNode }) => {
     return (
        <div>
         <Header setOpenSiderbar={setOpenSiderbar}></Header>
-         <div className="flex">
+         <div className="flex overflow-x-auto">
             <Sidebar open={openSiderbar} setOpen={setOpenSiderbar}></Sidebar>
-            <div className="flex-1 flex-grow p-5">{children}</div>
+            <div className="flex-1 flex-grow p-5 min-w-0">{children}</div>
 
         </div>
        </div>

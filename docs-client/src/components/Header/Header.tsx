@@ -31,6 +31,11 @@ const Header: React.FC<HeaderProps> = ({ setOpenSiderbar }) => {
                     </button>
                 </div>
 
+                {/* Middle - Message */}
+                <div className="flex-1 flex justify-center">
+                    <span className="text-[15px] text-gray-700">Your Trusted companion in deal</span>
+                </div>
+
                 {/* Right - Avatar */}
                 <div className="flex items-center space-x-3">
                     <div className="relative">

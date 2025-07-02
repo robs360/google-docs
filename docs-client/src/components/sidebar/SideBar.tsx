@@ -43,7 +43,7 @@ export default function Sidebar({ open, setOpen }:any) {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 z-[100] h-full w-52 transform bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out md:static md:z-[100] md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-[100] h-full w-52 min-w-52 transform bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out md:static md:z-[100] md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
