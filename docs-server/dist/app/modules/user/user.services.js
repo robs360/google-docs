@@ -22,7 +22,6 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
 const loginuserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = payload;
     const result = yield user_model_1.userModel.findOne({ email: email });
-    console.log(result);
     if (!result) {
         return {
             success: false,
@@ -30,7 +29,7 @@ const loginuserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function*
         };
     }
     if (result.password === password) {
-        const token = jsonwebtoken_1.default.sign({ name: result.name, image: result.image, email: result.email }, "abcfeakljdfkl12@", { expiresIn: '7d' });
+        const token = jsonwebtoken_1.default.sign({ name: result.name, image: result.image, email: result.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
         return {
             success: true,
             message: 'Login successful',
