@@ -13,6 +13,7 @@ const deleteDocumentFromDB = async (id: string) => {
     return result
 }
 
+
 export const documentServices = {
     createDocumentIntoDB,deleteDocumentFromDB
 }

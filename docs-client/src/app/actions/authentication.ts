@@ -10,7 +10,7 @@ export const registerUser = async (user: TUser) => {
     try {
         console.log(user)
         
-        const res = await fetch(`${process.env.BASE_URL}/api/v1/user/register`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/user/register`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -29,7 +29,7 @@ export const registerUser = async (user: TUser) => {
 export const loginUser = async (userData: { email: string, password: string }) => {
     try {
 
-        const res = await fetch(`${process.env.BASE_URL}/api/v1/user/login`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/user/login`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",

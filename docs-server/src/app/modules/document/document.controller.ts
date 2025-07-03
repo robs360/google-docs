@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { documentServices } from "./document.services";
+import { documentModel } from "./document.model";
 
 const createDocument: RequestHandler = async (req, res) => {
     try {
@@ -24,6 +25,42 @@ const deleteDocument: RequestHandler = async (req, res) => {
     }
 }
 
+const getAlldocument = async (req: any, res: any) => {
+    try {
+        const ownedDocs = await documentModel.find({ owner: req.user.email });
+        const sharedDocs = await documentModel.find({ 'sharedWith.user': req.user.email });
+        res.json({ ownedDocs, sharedDocs });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
+
+const getSingleDocument = async (req: any, res: any) => {
+    try {
+        const doc = await documentModel.findById(req.params.id);
+        console.log("asdfasdf ",doc)
+        if (!doc) res.status(404).json({ error: 'Document not found' });
+
+        else {
+
+            const isOwner = doc.owner === req.user.email
+            const sharedUser: any = doc.sharedWith.find(sw => sw.user === req.user.email);
+            
+            if (!isOwner && !sharedUser) {
+                res.status(403).json({ error: 'Access denied' });
+            }
+
+            else {
+                res.status(200).json({ document: doc, role: isOwner ? 'owner' : sharedUser.role });
+            }
+
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+}
 export const documentController = {
-    createDocument, deleteDocument
+    createDocument, deleteDocument,
+    getAlldocument,getSingleDocument
 }

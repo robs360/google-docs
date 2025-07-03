@@ -1,9 +1,9 @@
 import { SimpleEditor } from "../tiptap-templates/simple/simple-editor"
 
-const TipTabEditor = () => {
+const TipTabEditor = ({id}:{id:string}) => {
     return (
         <div>
-             <SimpleEditor />
+             <SimpleEditor id={id} />
         </div>
     )
 }

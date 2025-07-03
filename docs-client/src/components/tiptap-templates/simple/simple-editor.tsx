@@ -14,7 +14,7 @@ import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { Underline } from "@tiptap/extension-underline"
-
+import { useEffect, useState } from "react";
 // --- Custom Extensions ---
 import { Link } from "@/components/tiptap-extension/link-extension"
 import { Selection } from "@/components/tiptap-extension/selection-extension"
@@ -66,16 +66,14 @@ import { useMobile } from "@/hooks/use-mobile"
 import { useWindowSize } from "@/hooks/use-window-size"
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
-// --- Components ---
-import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
 
-// --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
+import axios from "axios"
 
-import content from "@/components/tiptap-templates/simple/data/content.json"
+
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -170,14 +168,73 @@ const MobileToolbarContent = ({
   </>
 )
 
-export function SimpleEditor() {
+export function SimpleEditor({id}:{id:string}) {
+  const [content, setContent] = useState<any>( {
+    "type": "doc",
+    "content": [
+        {
+            "type": "paragraph",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "Start Writing..."
+                }
+            ]
+        }
+    ]
+});
   const isMobile = useMobile()
   const windowSize = useWindowSize()
   const [mobileView, setMobileView] = React.useState<
     "main" | "highlighter" | "link"
   >("main")
   const toolbarRef = React.useRef<HTMLDivElement>(null)
+  const [token, setToken] = useState<string | null>(null);
+  
 
+  useEffect(() => {
+      const storedToken = localStorage.getItem("token");
+      console.log(storedToken)
+      setToken(storedToken);
+     
+  }, []);
+
+
+  // ... inside your component
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+
+  
+    if (!id || !storedToken) {
+     
+      return;
+    }
+  
+    const fetchContent = async () => {
+      
+  
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/document/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+            timeout: 1500, // add a timeout to avoid silent hangs
+          }
+        );
+  
+        console.log("✅ Got response", response.data.document.content);
+        setContent(response.data.document.content);
+        console.log(content)
+      } catch (error: any) {
+        
+        setContent({ type: "doc", content: [] });
+      }
+    };
+  
+    fetchContent();
+  }, [id,token]); 
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -189,31 +246,37 @@ export function SimpleEditor() {
       },
     },
     extensions: [
-      StarterKit,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Underline,
-      TaskList,
-      TaskItem.configure({ nested: true }),
-      Highlight.configure({ multicolor: true }),
+      StarterKit, // 🔴 this is mandatory
       Image,
-      Typography,
-      Superscript,
-      Subscript,
-
-      Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
+      TaskItem,
+      TaskList,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
       }),
+      Typography,
+      Highlight,
+      Subscript,
+      Superscript,
+      Underline,
+      Link,
+      Selection,
       TrailingNode,
-      Link.configure({ openOnClick: false }),
+      ImageUploadNode,
+      // any others...
     ],
-    content: content,
+    content: content || {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "Start Writing..." }
+          ]
+        }
+      ]
+    },
   })
-
+  
   const bodyRect = useCursorVisibility({
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
@@ -224,7 +287,7 @@ export function SimpleEditor() {
       setMobileView("main")
     }
   }, [isMobile, mobileView])
-
+ console.log(JSON.stringify(content),id)
   return (
     <EditorContext.Provider value={{ editor }}>
       <Toolbar

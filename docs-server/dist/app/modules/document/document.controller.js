@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.documentController = void 0;
 const document_services_1 = require("./document.services");
+const document_model_1 = require("./document.model");
 const createDocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const documentData = req.body;
@@ -31,6 +32,38 @@ const deleteDocument = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).json({ error: 'Server error' });
     }
 });
+const getAlldocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const ownedDocs = yield document_model_1.documentModel.find({ owner: req.user.email });
+        const sharedDocs = yield document_model_1.documentModel.find({ 'sharedWith.user': req.user.email });
+        res.json({ ownedDocs, sharedDocs });
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+const getSingleDocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const doc = yield document_model_1.documentModel.findById(req.params.id);
+        console.log("asdfasdf ", doc);
+        if (!doc)
+            res.status(404).json({ error: 'Document not found' });
+        else {
+            const isOwner = doc.owner === req.user.email;
+            const sharedUser = doc.sharedWith.find(sw => sw.user === req.user.email);
+            if (!isOwner && !sharedUser) {
+                res.status(403).json({ error: 'Access denied' });
+            }
+            else {
+                res.status(200).json({ document: doc, role: isOwner ? 'owner' : sharedUser.role });
+            }
+        }
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
 exports.documentController = {
-    createDocument, deleteDocument
+    createDocument, deleteDocument,
+    getAlldocument, getSingleDocument
 };
