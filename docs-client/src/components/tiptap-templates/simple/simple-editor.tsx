@@ -67,8 +67,6 @@ import { useWindowSize } from "@/hooks/use-window-size"
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
 
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
-
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 import axios from "axios"
@@ -91,7 +89,7 @@ const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
+        <HeadingDropdownMenu  levels={[1, 2, 3, 4]} />
         <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} />
         <BlockquoteButton />
         <CodeBlockButton />
@@ -102,7 +100,7 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <MarkButton type="bold" />
         <MarkButton type="italic" />
-        
+
         <MarkButton type="code" />
         <MarkButton type="underline" />
         {!isMobile ? (
@@ -113,7 +111,7 @@ const MainToolbarContent = ({
         {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
       </ToolbarGroup>
 
-     
+
 
       <ToolbarSeparator />
 
@@ -134,7 +132,7 @@ const MainToolbarContent = ({
 
       {isMobile && <ToolbarSeparator />}
 
-      
+
     </>
   )
 }
@@ -168,21 +166,8 @@ const MobileToolbarContent = ({
   </>
 )
 
-export function SimpleEditor({id}:{id:string}) {
-  const [content, setContent] = useState<any>( {
-    "type": "doc",
-    "content": [
-        {
-            "type": "paragraph",
-            "content": [
-                {
-                    "type": "text",
-                    "text": "Start Writing..."
-                }
-            ]
-        }
-    ]
-});
+export function SimpleEditor({ id }: { id: string }) {
+  const [content, setContent] = useState<any>(null);
   const isMobile = useMobile()
   const windowSize = useWindowSize()
   const [mobileView, setMobileView] = React.useState<
@@ -190,51 +175,15 @@ export function SimpleEditor({id}:{id:string}) {
   >("main")
   const toolbarRef = React.useRef<HTMLDivElement>(null)
   const [token, setToken] = useState<string | null>(null);
-  
-
-  useEffect(() => {
-      const storedToken = localStorage.getItem("token");
-      console.log(storedToken)
-      setToken(storedToken);
-     
-  }, []);
 
 
-  // ... inside your component
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
 
-  
-    if (!id || !storedToken) {
-     
-      return;
-    }
-  
-    const fetchContent = async () => {
-      
-  
-      try {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/document/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-            timeout: 1500, // add a timeout to avoid silent hangs
-          }
-        );
-  
-        console.log("✅ Got response", response.data.document.content);
-        setContent(response.data.document.content);
-        console.log(content)
-      } catch (error: any) {
-        
-        setContent({ type: "doc", content: [] });
-      }
-    };
-  
-    fetchContent();
-  }, [id,token]); 
+    setToken(storedToken);
+
+  }, []);
+
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -264,19 +213,52 @@ export function SimpleEditor({id}:{id:string}) {
       ImageUploadNode,
       // any others...
     ],
-    content: content || {
-      type: "doc",
-      content: [
-        {
-          type: "paragraph",
-          content: [
-            { type: "text", text: "Start Writing..." }
-          ]
-        }
-      ]
-    },
+    content: content,
+    onUpdate: ({ editor }) => {
+      const updatedContent = editor.getJSON()
+      setContent(updatedContent)  // ⬅️ now state is updated on change
+    }
   })
-  
+  // ... inside your component
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+
+
+    if (!id || !storedToken) {
+
+      return;
+    }
+
+    const fetchContent = async () => {
+
+
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/document/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+            timeout: 1500, // add a timeout to avoid silent hangs
+          }
+        );
+
+        console.log("✅ Got response", response.data.document.content);
+        setContent(response.data.document.content);
+        if (editor && response.data.document.content) {
+          editor.commands.setContent(response.data.document.content, false)
+        }
+        console.log(content)
+      } catch (error: any) {
+
+        setContent({ type: "doc", content: [] });
+      }
+    };
+
+    fetchContent();
+  }, [id, token]);
+
+
   const bodyRect = useCursorVisibility({
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
@@ -287,7 +269,8 @@ export function SimpleEditor({id}:{id:string}) {
       setMobileView("main")
     }
   }, [isMobile, mobileView])
- console.log(JSON.stringify(content),id)
+  console.log(JSON.stringify(content))
+  if (!content) return <p className="text-center">Loading.....</p>
   return (
     <EditorContext.Provider value={{ editor }}>
       <Toolbar
@@ -295,8 +278,8 @@ export function SimpleEditor({id}:{id:string}) {
         style={
           isMobile
             ? {
-                bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
-              }
+              bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
+            }
             : {}
         }
       >

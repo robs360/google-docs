@@ -101,7 +101,7 @@ export function HeadingDropdownMenu({
   }
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={handleOnOpenChange}>
+    <DropdownMenu  open={isOpen} onOpenChange={handleOnOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
@@ -121,7 +121,7 @@ export function HeadingDropdownMenu({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent>
+      <DropdownMenuContent className="!bg-white rounded-md shadow-2xl">
         <DropdownMenuGroup>
           {levels.map((level) => (
             <DropdownMenuItem key={`heading-${level}`} asChild>
@@ -129,7 +129,7 @@ export function HeadingDropdownMenu({
                 editor={editor}
                 level={level}
                 text={getFormattedHeadingName(level)}
-                tooltip={""}
+                tooltip={""} className="bg-white"
               />
             </DropdownMenuItem>
           ))}
