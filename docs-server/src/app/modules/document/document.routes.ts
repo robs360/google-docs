@@ -4,7 +4,8 @@ import authMiddleware from '../../middleware/auth'
 
 const router=express.Router()
 
-router.post('/create', documentController.createDocument)
+router.post('/create',authMiddleware, documentController.createDocument)
 router.get('/',authMiddleware,documentController.getAlldocument)
 router.get('/:id',authMiddleware,documentController.getSingleDocument)
+router.put('/:id',authMiddleware,documentController.updateDocument)
 export const documentRoutes=router

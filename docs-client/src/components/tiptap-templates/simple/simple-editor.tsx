@@ -70,6 +70,7 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 import axios from "axios"
+import { saveDocs } from "@/utils/saveDocs"
 
 
 
@@ -89,7 +90,7 @@ const MainToolbarContent = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <HeadingDropdownMenu  levels={[1, 2, 3, 4]} />
+        <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
         <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} />
         <BlockquoteButton />
         <CodeBlockButton />
@@ -167,6 +168,7 @@ const MobileToolbarContent = ({
 )
 
 export function SimpleEditor({ id }: { id: string }) {
+  let saveTimeout: ReturnType<typeof setTimeout> | null = null
   const [content, setContent] = useState<any>(null);
   const isMobile = useMobile()
   const windowSize = useWindowSize()
@@ -216,7 +218,13 @@ export function SimpleEditor({ id }: { id: string }) {
     content: content,
     onUpdate: ({ editor }) => {
       const updatedContent = editor.getJSON()
-      setContent(updatedContent)  // ⬅️ now state is updated on change
+      setContent(updatedContent)
+      if (saveTimeout) clearTimeout(saveTimeout)  // clear previous timeout
+      saveTimeout = setTimeout(() => {
+        if (token) {
+          saveDocs({ id, content: updatedContent, token }).catch(console.error)
+        }
+      }, 1500) // ⬅️ now state is updated on change
     }
   })
   // ... inside your component

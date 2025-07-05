@@ -121,7 +121,7 @@ export function HeadingDropdownMenu({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="!bg-white rounded-md shadow-2xl">
+      <DropdownMenuContent className="!bg-white !rounded-md !shadow-2xl">
         <DropdownMenuGroup>
           {levels.map((level) => (
             <DropdownMenuItem key={`heading-${level}`} asChild>

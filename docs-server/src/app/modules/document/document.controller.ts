@@ -39,7 +39,7 @@ const getAlldocument = async (req: any, res: any) => {
 const getSingleDocument = async (req: any, res: any) => {
     try {
         const doc = await documentModel.findById(req.params.id);
-        console.log("asdfasdf ",doc)
+        
         if (!doc) res.status(404).json({ error: 'Document not found' });
 
         else {
@@ -60,7 +60,38 @@ const getSingleDocument = async (req: any, res: any) => {
         res.status(500).json({ error: 'Server error' });
     }
 }
+
+const updateDocument = async (req: any, res: any) => {
+    try {
+        const doc = await documentModel.findById(req.params.id);
+        if (!doc) res.status(404).json({ error: 'Document not found' });
+
+        else {
+            const isOwner = doc.owner === req.user.email;
+            const sharedUser = doc.sharedWith.find(sw => sw.user === req.user.email);
+
+            if (!isOwner && (!sharedUser || sharedUser.role !== 'editor')) {
+                res.status(403).json({ error: 'No permission to edit' });
+            }
+
+            else {
+                const { content, title } = req.body;
+                if (content !== undefined) doc.content = content;
+                if (title !== undefined) doc.title = title;
+
+                await doc.save();
+                res.status(200).json(doc);
+
+            }
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
+
 export const documentController = {
     createDocument, deleteDocument,
-    getAlldocument,getSingleDocument
+    getAlldocument,getSingleDocument,
+    updateDocument
 }
