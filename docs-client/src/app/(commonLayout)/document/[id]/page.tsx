@@ -1,5 +1,7 @@
 'use client'
+import { ShareModal } from "@/components/ShareModal/ShareModal";
 import TipTabEditor from "@/components/TipTabEditor/TipTabEditor"
+
 import { useParams } from "next/navigation";
 
 const DynamicDocument=()=>{
@@ -8,6 +10,7 @@ const DynamicDocument=()=>{
 
     return(
         <div>
+            <ShareModal></ShareModal>
             <TipTabEditor id={id}></TipTabEditor>
         </div>
     )

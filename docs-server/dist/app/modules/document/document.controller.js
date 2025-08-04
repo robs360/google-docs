@@ -34,6 +34,7 @@ const deleteDocument = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 const getAlldocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        console.log("comming");
         const ownedDocs = yield document_model_1.documentModel.find({ owner: req.user.email });
         const sharedDocs = yield document_model_1.documentModel.find({ 'sharedWith.user': req.user.email });
         res.json({ ownedDocs, sharedDocs });
@@ -88,8 +89,51 @@ const updateDocument = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(500).json({ error: 'Server error' });
     }
 });
+const shareDocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email, role } = req.body;
+    const { id } = req.params;
+    if (!email || !role) {
+        res.status(400).json({ error: 'Email and role are required' });
+    }
+    else {
+        if (!['viewer', 'editor'].includes(role)) {
+            res.status(400).json({ error: 'Invalid role' });
+        }
+        else {
+            try {
+                const doc = yield document_model_1.documentModel.findById(id);
+                if (!doc)
+                    res.status(404).json({ error: 'Document not found' });
+                // Only owner can share
+                else {
+                    if (doc.owner !== req.user.email) {
+                        res.status(403).json({ error: 'Only owner can share this document' });
+                    }
+                    // Check if already shared with this email
+                    else {
+                        const alreadyShared = doc.sharedWith.find(sw => sw.user === email);
+                        if (alreadyShared) {
+                            // Update role if needed
+                            alreadyShared.role = role;
+                        }
+                        else {
+                            // Add new shared user
+                            doc.sharedWith.push({ user: email, role });
+                        }
+                        yield doc.save();
+                        res.json({ message: 'Document shared successfully', sharedWith: doc.sharedWith });
+                    }
+                }
+            }
+            catch (err) {
+                console.error(err);
+                res.status(500).json({ error: 'Server error' });
+            }
+        }
+    }
+});
 exports.documentController = {
     createDocument, deleteDocument,
     getAlldocument, getSingleDocument,
-    updateDocument
+    updateDocument, shareDocument
 };

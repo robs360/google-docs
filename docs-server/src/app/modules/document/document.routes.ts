@@ -8,4 +8,5 @@ router.post('/create',authMiddleware, documentController.createDocument)
 router.get('/',authMiddleware,documentController.getAlldocument)
 router.get('/:id',authMiddleware,documentController.getSingleDocument)
 router.put('/:id',authMiddleware,documentController.updateDocument)
+router.post('/:id/share',authMiddleware,documentController.shareDocument)
 export const documentRoutes=router

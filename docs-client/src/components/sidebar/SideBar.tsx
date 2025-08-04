@@ -48,14 +48,7 @@ export default function Sidebar({ open, setOpen }:any) {
         }`}
       >
         {/* Logo */}
-        <div className="p-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white">
-              <span className="text-lg font-bold">DC</span>
-            </div>
-            <span className="text-xl font-semibold">E-DEAL</span>
-          </div>
-        </div>
+        
         
           <div className="px-3 py-4">
             <nav className="space-y-4">

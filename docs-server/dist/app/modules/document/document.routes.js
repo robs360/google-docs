@@ -12,4 +12,5 @@ router.post('/create', auth_1.default, document_controller_1.documentController.
 router.get('/', auth_1.default, document_controller_1.documentController.getAlldocument);
 router.get('/:id', auth_1.default, document_controller_1.documentController.getSingleDocument);
 router.put('/:id', auth_1.default, document_controller_1.documentController.updateDocument);
+router.post('/:id/share', auth_1.default, document_controller_1.documentController.shareDocument);
 exports.documentRoutes = router;
