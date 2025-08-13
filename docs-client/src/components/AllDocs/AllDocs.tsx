@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FileText, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllDocs } from '@/app/actions/docs';
+import { deleteDocs } from '@/app/actions/deleteDocs';
 
 type Doc = {
     _id: string;
@@ -37,8 +38,12 @@ export default function AllDocs() {
         setLoading(false);
     };
 
-    const handleDelete = async (docId: string) => {
-
+    const handleDelete = async (id: string) => {
+       const token=localStorage.getItem('token')
+       if(token){
+          const responese=await deleteDocs(id, token)
+          console.log(responese)
+       }
     };
 
     const docsToShow = showType === 'owned' ? docs.ownedDocs : docs.sharedDocs;
@@ -52,8 +57,8 @@ export default function AllDocs() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-6">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen max-w-[830px] mx-auto to-white">
+            <div className="mx-auto">
                 <motion.h1
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -99,9 +104,9 @@ export default function AllDocs() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="overflow-hidden rounded-2xl shadow-sm border border-gray-200 bg-white"
+                            className="overflow-auto rounded-2xl shadow-sm border border-gray-200 bg-white"
                         >
-                            <table className="min-w-full divide-y divide-gray-200">
+                            <table className="w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr className="bg-gradient-to-r from-blue-500 to-purple-500">
                                         <th className="py-4 px-6 text-left text-xs font-medium text-white uppercase tracking-wider">Type</th>
@@ -148,7 +153,7 @@ export default function AllDocs() {
                                                     </Link>
 
                                                     {showType === 'owned' && (
-                                                        <button
+                                                        <button onClick={()=>handleDelete(doc._id)}
 
                                                             className="bg-red-50 p-2 rounded-full hover:bg-red-100 transition-colors duration-200 disabled:opacity-50"
                                                         >
@@ -158,13 +163,7 @@ export default function AllDocs() {
                                                         </button>
                                                     )}
 
-                                                    <Link
-                                                        href={`/document/${doc._id}`}
-                                                        className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full
-                              hover:from-blue-600 hover:to-purple-600 transition-all duration-200 text-sm font-medium"
-                                                    >
-                                                        Open
-                                                    </Link>
+                                                    
                                                 </div>
                                             </td>
                                         </motion.tr>
