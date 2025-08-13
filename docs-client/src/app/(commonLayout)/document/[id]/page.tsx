@@ -10,7 +10,7 @@ const DynamicDocument=()=>{
 
     return(
         <div>
-            <ShareModal></ShareModal>
+            <ShareModal id={id}></ShareModal>
             <TipTabEditor id={id}></TipTabEditor>
         </div>
     )
