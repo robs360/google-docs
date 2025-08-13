@@ -1,26 +1,29 @@
 import { deleteDocs } from "@/app/actions/deleteDocs";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { getAllDocs } from "@/app/actions/docs";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { toast } from 'sonner'
-export function AlertDialogDemo({ id }: { id: string }) {
+export function AlertDeleteDiagram({ id, setDocs }: {
+    id: string;
+    setDocs: React.Dispatch<React.SetStateAction<{ ownedDocs: any[]; sharedDocs: any[] }>>;
+}) {
 
     const handleDelete = async (id: string) => {
         const token = localStorage.getItem('token')
         if (token) {
             const response = await deleteDocs(id, token)
             if (response.deletedCount === 1) {
-                
+
+                const result = await getAllDocs(token);
+                console.log(result)
+                if (!result.error) {
+                    setDocs({
+                        ownedDocs: result.ownedDocs,
+                        sharedDocs: result.sharedDocs
+                    });
+                }
+
                 toast.success('Document deleted successfully!', {
                     position: 'bottom-right', // positions: 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'top-center', 'bottom-center'
                     duration: 4000, // duration in ms
@@ -31,6 +34,7 @@ export function AlertDialogDemo({ id }: { id: string }) {
             }
         }
     };
+
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>

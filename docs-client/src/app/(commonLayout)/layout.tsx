@@ -2,6 +2,7 @@
 import Header from "@/components/Header/Header"
 import Sidebar from "@/components/sidebar/SideBar"
 import { useState } from "react"
+import { Toaster } from "sonner"
 
 const CommonLayout = ({ children }: { children: React.ReactNode }) => {
     const [openSiderbar, setOpenSiderbar] = useState(false)
@@ -15,6 +16,7 @@ const CommonLayout = ({ children }: { children: React.ReactNode }) => {
                 <div className="flex-1 flex-grow p-5 min-w-0">{children}</div>
 
             </div>
+             <Toaster position="bottom-right" richColors />
         </div>
     )
 }

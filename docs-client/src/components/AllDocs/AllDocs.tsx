@@ -1,12 +1,10 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FileText, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { FileText, Pencil, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllDocs } from '@/app/actions/docs';
-import { deleteDocs } from '@/app/actions/deleteDocs';
-import { AlertDialogDemo } from '../DeletDialog';
+import { AlertDeleteDiagram } from '../DeleteDialog';
 
 type Doc = {
     _id: string;
@@ -18,7 +16,6 @@ export default function AllDocs() {
     const [showType, setShowType] = useState<'owned' | 'shared'>('owned');
     const [docs, setDocs] = useState<{ ownedDocs: Doc[]; sharedDocs: Doc[] }>({ ownedDocs: [], sharedDocs: [] });
     const [loading, setLoading] = useState(true);
-    
     
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -147,7 +144,7 @@ export default function AllDocs() {
 
                                                     {showType === 'owned' && (
                                                         
-                                                            <AlertDialogDemo id={doc._id}></AlertDialogDemo>                       
+                                                            <AlertDeleteDiagram id={doc._id} setDocs={setDocs}></AlertDeleteDiagram>                       
                                                     )}
                                             
                                                 </div>
