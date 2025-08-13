@@ -6,6 +6,7 @@ import { FileText, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllDocs } from '@/app/actions/docs';
 import { deleteDocs } from '@/app/actions/deleteDocs';
+import { AlertDialogDemo } from '../DeletDialog';
 
 type Doc = {
     _id: string;
@@ -36,14 +37,6 @@ export default function AllDocs() {
             });
         }
         setLoading(false);
-    };
-
-    const handleDelete = async (id: string) => {
-       const token=localStorage.getItem('token')
-       if(token){
-          const responese=await deleteDocs(id, token)
-          console.log(responese)
-       }
     };
 
     const docsToShow = showType === 'owned' ? docs.ownedDocs : docs.sharedDocs;
@@ -153,17 +146,10 @@ export default function AllDocs() {
                                                     </Link>
 
                                                     {showType === 'owned' && (
-                                                        <button onClick={()=>handleDelete(doc._id)}
-
-                                                            className="bg-red-50 p-2 rounded-full hover:bg-red-100 transition-colors duration-200 disabled:opacity-50"
-                                                        >
-
-                                                            <Trash2 className="w-4 h-4 text-red-600" />
-
-                                                        </button>
+                                                        
+                                                            <AlertDialogDemo id={doc._id}></AlertDialogDemo>                       
                                                     )}
-
-                                                    
+                                            
                                                 </div>
                                             </td>
                                         </motion.tr>
