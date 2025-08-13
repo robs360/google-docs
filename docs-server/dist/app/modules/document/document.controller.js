@@ -34,7 +34,6 @@ const deleteDocument = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 const getAlldocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("comming");
         const ownedDocs = yield document_model_1.documentModel.find({ owner: req.user.email });
         const sharedDocs = yield document_model_1.documentModel.find({ 'sharedWith.user': req.user.email });
         res.json({ ownedDocs, sharedDocs });
@@ -90,9 +89,9 @@ const updateDocument = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 const shareDocument = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, role } = req.body;
+    const { user, role } = req.body;
     const { id } = req.params;
-    if (!email || !role) {
+    if (!user || !role) {
         res.status(400).json({ error: 'Email and role are required' });
     }
     else {
@@ -104,21 +103,17 @@ const shareDocument = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 const doc = yield document_model_1.documentModel.findById(id);
                 if (!doc)
                     res.status(404).json({ error: 'Document not found' });
-                // Only owner can share
                 else {
                     if (doc.owner !== req.user.email) {
                         res.status(403).json({ error: 'Only owner can share this document' });
                     }
-                    // Check if already shared with this email
                     else {
-                        const alreadyShared = doc.sharedWith.find(sw => sw.user === email);
+                        const alreadyShared = doc.sharedWith.find(sw => sw.user === user);
                         if (alreadyShared) {
-                            // Update role if needed
                             alreadyShared.role = role;
                         }
                         else {
-                            // Add new shared user
-                            doc.sharedWith.push({ user: email, role });
+                            doc.sharedWith.push({ user: user, role });
                         }
                         yield doc.save();
                         res.json({ message: 'Document shared successfully', sharedWith: doc.sharedWith });
