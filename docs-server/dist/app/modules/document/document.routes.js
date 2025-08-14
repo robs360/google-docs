@@ -13,5 +13,6 @@ router.get('/', auth_1.default, document_controller_1.documentController.getAlld
 router.get('/:id', auth_1.default, document_controller_1.documentController.getSingleDocument);
 router.delete('/:id', auth_1.default, document_controller_1.documentController.deleteDocument);
 router.put('/:id', auth_1.default, document_controller_1.documentController.updateDocument);
+router.put('/title/:id', auth_1.default, document_controller_1.documentController.updateTitle);
 router.post('/:id/share', auth_1.default, document_controller_1.documentController.shareDocument);
 exports.documentRoutes = router;
