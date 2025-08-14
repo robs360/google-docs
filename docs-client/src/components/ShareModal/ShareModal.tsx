@@ -32,7 +32,7 @@ export function ShareModal({id}:{id:string}) {
     <Dialog>
 
       <DialogTrigger asChild>
-        <Button className="px-4 py-1 text-white rounded-[7px] bg-blue-500 hover:bg-blue-500 hover:text-white" variant="outline">
+        <Button className="px-4 py-1 w-[130px] h-[40px] text-white rounded-[7px] bg-blue-500 hover:bg-blue-500 hover:text-white" variant="outline">
           Share
         </Button>
       </DialogTrigger>

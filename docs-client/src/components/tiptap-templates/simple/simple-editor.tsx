@@ -178,7 +178,6 @@ export function SimpleEditor({ id }: { id: string }) {
   const toolbarRef = React.useRef<HTMLDivElement>(null)
   const [token, setToken] = useState<string | null>(null);
 
-
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
 
@@ -224,10 +223,10 @@ export function SimpleEditor({ id }: { id: string }) {
         if (token) {
           saveDocs({ id, content: updatedContent, token }).catch(console.error)
         }
-      }, 1500) // ⬅️ now state is updated on change
+      }, 1500) 
     }
   })
-  // ... inside your component
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
 
@@ -251,12 +250,12 @@ export function SimpleEditor({ id }: { id: string }) {
           }
         );
 
-        console.log("✅ Got response", response.data.document.content);
+      
         setContent(response.data.document.content);
         if (editor && response.data.document.content) {
           editor.commands.setContent(response.data.document.content, false)
         }
-        console.log(content)
+      
       } catch (error: any) {
 
         setContent({ type: "doc", content: [] });
@@ -277,7 +276,7 @@ export function SimpleEditor({ id }: { id: string }) {
       setMobileView("main")
     }
   }, [isMobile, mobileView])
-  console.log(JSON.stringify(content))
+  
   if (!content) return <p className="text-center">Loading.....</p>
   return (
     <EditorContext.Provider value={{ editor }}>

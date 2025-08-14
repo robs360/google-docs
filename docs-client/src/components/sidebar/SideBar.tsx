@@ -24,11 +24,6 @@ export default function Sidebar({ open, setOpen }: any) {
       icon: Upload,
     },
 
-    {
-      name: "Settings",
-      href: "/driver/settings",
-      icon: Settings,
-    },
   ]
 
   return (
