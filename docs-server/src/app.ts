@@ -9,7 +9,8 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://job-task-client-two.vercel.app'],  // only allow local frontend
   credentials: true
 }));
-app.use('/api/v1',router)
+
+app.use('/api/v1', router)
 app.get('/', (req, res) => {
   res.send('Hello World')
 })

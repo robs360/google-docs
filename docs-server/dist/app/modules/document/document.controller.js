@@ -98,7 +98,6 @@ const updateTitle = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 res.status(403).json({ error: 'No permission to edit' });
             }
             else {
-                console.log("refactoring", req.body);
                 const { title } = req.body;
                 if (title !== undefined)
                     doc.title = title;

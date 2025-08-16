@@ -40,14 +40,14 @@ const getAlldocument = async (req: any, res: any) => {
 const getSingleDocument = async (req: any, res: any) => {
     try {
         const doc = await documentModel.findById(req.params.id);
-        
+
         if (!doc) res.status(404).json({ error: 'Document not found' });
 
         else {
 
             const isOwner = doc.owner === req.user.email
             const sharedUser: any = doc.sharedWith.find(sw => sw.user === req.user.email);
-            
+
             if (!isOwner && !sharedUser) {
                 res.status(403).json({ error: 'Access denied' });
             }
@@ -76,7 +76,7 @@ const updateDocument = async (req: any, res: any) => {
             }
 
             else {
-                const { content} = req.body;
+                const { content } = req.body;
                 if (content !== undefined) doc.content = content;
                 await doc.save();
                 res.status(200).json(doc);
@@ -92,7 +92,7 @@ const updateTitle = async (req: any, res: any) => {
     try {
         const doc = await documentModel.findById(req.params.id);
         if (!doc) res.status(404).json({ error: 'Document not found' });
-        
+
         else {
             const isOwner = doc.owner === req.user.email;
             const sharedUser = doc.sharedWith.find(sw => sw.user === req.user.email);
@@ -102,7 +102,7 @@ const updateTitle = async (req: any, res: any) => {
             }
 
             else {
-             
+
                 const { title } = req.body;
                 if (title !== undefined) doc.title = title;
                 await doc.save();
@@ -119,7 +119,7 @@ const shareDocument = async (req: any, res: any) => {
     const { id } = req.params;
 
     if (!user || !role) {
-        
+
         res.status(400).json({ error: 'Email and role are required' });
     }
     else {
@@ -133,15 +133,15 @@ const shareDocument = async (req: any, res: any) => {
                 if (!doc) res.status(404).json({ error: 'Document not found' });
                 else {
                     if (doc.owner !== req.user.email) {
-                         res.status(403).json({ error: 'Only owner can share this document' });
+                        res.status(403).json({ error: 'Only owner can share this document' });
                     }
 
                     else {
                         const alreadyShared = doc.sharedWith.find(sw => sw.user === user);
-                        if (alreadyShared) { 
+                        if (alreadyShared) {
                             alreadyShared.role = role;
                         } else {
-                        
+
                             doc.sharedWith.push({ user: user, role });
                         }
 
@@ -160,6 +160,6 @@ const shareDocument = async (req: any, res: any) => {
 
 export const documentController = {
     createDocument, deleteDocument,
-    getAlldocument,getSingleDocument,
-    updateDocument,shareDocument,updateTitle
+    getAlldocument, getSingleDocument,
+    updateDocument, shareDocument, updateTitle
 }

@@ -15,14 +15,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const app_1 = require("./app");
+const http_1 = require("http");
+const socket_io_1 = require("socket.io");
 dotenv_1.default.config({ path: '.env.local' });
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield mongoose_1.default.connect(process.env.database_url);
+            const httpServer = (0, http_1.createServer)(app_1.app);
+            const io = new socket_io_1.Server(httpServer, {
+                cors: {
+                    origin: ['http://localhost:3000', 'https://job-task-client-two.vercel.app'],
+                    methods: ['GET', 'POST']
+                }
+            });
             const PORT = process.env.PORT || 5000;
-            app_1.app.listen(PORT, () => {
-                console.log(`app is running on port ${PORT}`);
+            httpServer.listen(PORT, () => {
+                console.log(`Server is running on port ${PORT}`);
             });
         }
         catch (error) {
