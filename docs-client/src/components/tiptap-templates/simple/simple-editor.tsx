@@ -5,6 +5,7 @@ import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit"
+
 import { Image } from "@tiptap/extension-image"
 import { TaskItem } from "@tiptap/extension-task-item"
 import { TaskList } from "@tiptap/extension-task-list"
@@ -71,6 +72,7 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 import axios from "axios"
 import { saveDocs } from "@/utils/saveDocs"
+import { getSocket } from "@/utils/socket"
 
 
 
@@ -166,7 +168,11 @@ const MobileToolbarContent = ({
     )}
   </>
 )
-
+interface OnlineUser {
+  socketId: string;
+  email: string;
+  image: string;
+}
 export function SimpleEditor({ id }: { id: string }) {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null
   const [content, setContent] = useState<any>(null);
@@ -177,7 +183,7 @@ export function SimpleEditor({ id }: { id: string }) {
   >("main")
   const toolbarRef = React.useRef<HTMLDivElement>(null)
   const [token, setToken] = useState<string | null>(null);
-
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
 
@@ -223,13 +229,12 @@ export function SimpleEditor({ id }: { id: string }) {
         if (token) {
           saveDocs({ id, content: updatedContent, token }).catch(console.error)
         }
-      }, 1500) 
+      }, 1500)
     }
   })
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-
 
     if (!id || !storedToken) {
 
@@ -237,7 +242,6 @@ export function SimpleEditor({ id }: { id: string }) {
     }
 
     const fetchContent = async () => {
-
 
       try {
         const response = await axios.get(
@@ -250,12 +254,12 @@ export function SimpleEditor({ id }: { id: string }) {
           }
         );
 
-      
+
         setContent(response.data.document.content);
         if (editor && response.data.document.content) {
           editor.commands.setContent(response.data.document.content, false)
         }
-      
+
       } catch (error: any) {
 
         setContent({ type: "doc", content: [] });
@@ -265,7 +269,31 @@ export function SimpleEditor({ id }: { id: string }) {
     fetchContent();
   }, [id, token]);
 
+  useEffect(() => {
+    if (!id) return;
 
+    const socket = getSocket();
+
+    let userInfo = { name: "Anonymous", image: "https://via.placeholder.com/150" };
+    const userData = localStorage.getItem("user");
+
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        userInfo = { name: user.email || "Anonymous", image: user.image || "https://via.placeholder.com/150" };
+      } catch (error) {
+        console.error("Failed to parse user data:", error);
+      }
+    }
+    socket.emit('join-document', { documentId: id, user: userInfo });
+
+    socket.on('document-users', (users: OnlineUser[]) => {
+      setOnlineUsers(users);
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [id]);
   const bodyRect = useCursorVisibility({
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
@@ -276,41 +304,57 @@ export function SimpleEditor({ id }: { id: string }) {
       setMobileView("main")
     }
   }, [isMobile, mobileView])
-  
-  if (!content) return <p className="text-center">Loading.....</p>
-  return (
-    <EditorContext.Provider value={{ editor }}>
-      <Toolbar
-        ref={toolbarRef}
-        style={
-          isMobile
-            ? {
-              bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
-            }
-            : {}
-        }
-      >
-        {mobileView === "main" ? (
-          <MainToolbarContent
-            onHighlighterClick={() => setMobileView("highlighter")}
-            onLinkClick={() => setMobileView("link")}
-            isMobile={isMobile}
-          />
-        ) : (
-          <MobileToolbarContent
-            type={mobileView === "highlighter" ? "highlighter" : "link"}
-            onBack={() => setMobileView("main")}
-          />
-        )}
-      </Toolbar>
 
-      <div className="content-wrapper">
-        <EditorContent
-          editor={editor}
-          role="presentation"
-          className="simple-editor-content"
-        />
+  if (!content) return <p className="text-center">Loading.....</p>
+  
+  return (
+    <div>
+      <div>
+        {
+          onlineUsers.map((user) => (
+            <img
+              key={user.email} // It's good practice to use a unique key, like the user's email
+              src={user.image}
+              className="rounded-full h-8 w-8 object-cover"
+              alt={user.email}
+              title={user.email}
+            />
+          ))
+        }
       </div>
-    </EditorContext.Provider>
+      <EditorContext.Provider value={{ editor }}>
+        <Toolbar
+          ref={toolbarRef}
+          style={
+            isMobile
+              ? {
+                bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
+              }
+              : {}
+          }
+        >
+          {mobileView === "main" ? (
+            <MainToolbarContent
+              onHighlighterClick={() => setMobileView("highlighter")}
+              onLinkClick={() => setMobileView("link")}
+              isMobile={isMobile}
+            />
+          ) : (
+            <MobileToolbarContent
+              type={mobileView === "highlighter" ? "highlighter" : "link"}
+              onBack={() => setMobileView("main")}
+            />
+          )}
+        </Toolbar>
+
+        <div className="content-wrapper">
+          <EditorContent
+            editor={editor}
+            role="presentation"
+            className="simple-editor-content"
+          />
+        </div>
+      </EditorContext.Provider>
+    </div>
   )
 }
