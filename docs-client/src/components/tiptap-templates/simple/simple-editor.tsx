@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@/components/tiptap-extension/link-extension"
 import { Selection } from "@/components/tiptap-extension/selection-extension"
 import { TrailingNode } from "@/components/tiptap-extension/trailing-node-extension"
-import { Toolbar} from "@/components/tiptap-ui-primitive/toolbar"
+import { Toolbar } from "@/components/tiptap-ui-primitive/toolbar"
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import "@/components/tiptap-node/code-block-node/code-block-node.scss"
 import "@/components/tiptap-node/list-node/list-node.scss"
@@ -83,6 +83,15 @@ export function SimpleEditor({ id }: { id: string }) {
     onUpdate: ({ editor }) => {
       const updatedContent = editor.getJSON()
       setContent(updatedContent)
+
+      const socket = getSocket()
+      if (socket.connected) { 
+        socket.emit('send-changes', {
+          documentId: id,
+          content: updatedContent
+        })
+      }
+
       if (saveTimeout) clearTimeout(saveTimeout)  // clear previous timeout
       saveTimeout = setTimeout(() => {
         if (token) {
@@ -125,23 +134,23 @@ export function SimpleEditor({ id }: { id: string }) {
   }, [id, token, editor]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !editor) return;
 
     const socket = getSocket();
 
-    let userInfo = { 
-      email: "Anonymous", 
-      image: "https://via.placeholder.com/150/cccccc/666666?text=A" 
+    let userInfo = {
+      email: "Anonymous",
+      image: "https://via.placeholder.com/150/cccccc/666666?text=A"
     };
-    
+
     const userData = localStorage.getItem("user");
 
     if (userData) {
       try {
         const user = JSON.parse(userData);
-        userInfo = { 
-          email: user.email || "Anonymous", 
-          image: user.image || "https://via.placeholder.com/150" 
+        userInfo = {
+          email: user.email || "Anonymous",
+          image: user.image || "https://via.placeholder.com/150"
         };
         console.log('✅ Parsed user info:', userInfo);
       } catch (error) {
@@ -152,7 +161,7 @@ export function SimpleEditor({ id }: { id: string }) {
     const joinDocument = () => {
       socket.emit('join-document', { documentId: id, user: userInfo });
     };
-   
+
     const handleDocumentUsers = (users: OnlineUser[]) => {
       setOnlineUsers(users);
     };
@@ -165,6 +174,14 @@ export function SimpleEditor({ id }: { id: string }) {
       setOnlineUsers([]);
     };
 
+   socket.on('receive-changes', (newContent: any) => {
+    if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(newContent)) {
+      editor.commands.setContent(newContent, false); 
+      console.log("frontend reciving changes ", newContent)
+      setContent(newContent); 
+    }
+  })
+
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
     socket.on('document-users', handleDocumentUsers);
@@ -176,17 +193,17 @@ export function SimpleEditor({ id }: { id: string }) {
     }
 
     return () => {
-      
+
       socket.off('connect', handleConnect);
       socket.off('disconnect', handleDisconnect);
       socket.off('document-users', handleDocumentUsers);
-      
+      socket.off('receive-changes');
       if (socket.connected) {
         socket.emit('leave-document', { documentId: id, user: userInfo });
       }
-      
+
     };
-  }, [id]);
+  }, [id, editor]);
 
   const bodyRect = useCursorVisibility({
     editor,
@@ -207,7 +224,7 @@ export function SimpleEditor({ id }: { id: string }) {
       <div className="flex items-center gap-2 p-3">
         {onlineUsers.length > 0 && (
           <>
-           
+
             {onlineUsers.map((user, index) => (
               <div key={`${user.socketId}-${user.email}`} className="relative group">
                 <img

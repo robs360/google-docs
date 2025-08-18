@@ -37,9 +37,14 @@ async function main() {
         if (!existing) {
           documentUsers[documentId].push({ socketId: socket.id, image: user.image, email: user.email });
         }
-
         io.to(documentId).emit('document-users', documentUsers[documentId]);
       });
+
+      socket.on('send-changes', ({ documentId, content }) => {
+        console.log("sending new content ",documentId)
+        socket.to(documentId).emit('receive-changes', content);
+      });
+
       socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         for (const documentId in documentUsers) {
