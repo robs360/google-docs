@@ -9,8 +9,23 @@ import { useEffect, useState } from "react";
 
 const DynamicDocument = () => {
     const [title, setTitle] = useState("")
+    const [role, setRole] = useState("")
+    const [owner, setOwner] = useState("")
+    
     const params = useParams();
+    
     const id = params?.id as string;
+  useEffect(() => {
+  const userData = localStorage.getItem("user")
+  if (userData) {
+    try {
+      const user = JSON.parse(userData)
+      setOwner(user.email)
+    } catch (err) {
+      console.error("Failed to parse user data", err)
+    }
+  }
+}, [])
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
         if (!id || !storedToken) {
@@ -28,7 +43,8 @@ const DynamicDocument = () => {
                         timeout: 1500, // add a timeout to avoid silent hangs
                     }
                 );
-
+                
+                setRole(response.data.document.owner)
                 setTitle(response.data.document.title);
 
             } catch (error: any) {
@@ -37,20 +53,20 @@ const DynamicDocument = () => {
         };
         fetchContent();
     }, [id]);
- 
+
     useEffect(() => {
         const fetchData = async () => {
             const token = localStorage.getItem("token")
             if (token && title) {
-                const response =await saveDocumentTitle( title,id, token)
+                const response = await saveDocumentTitle(title, id, token)
             }
         }
         fetchData()
-    }, [title,id])
+    }, [title, id])
     return (
         <div className="space-y-6">
             <div className="flex justify-between flex-col md:flex-row gap-6">
-                <ShareModal id={id}></ShareModal>
+             {role === owner && <ShareModal id={id} />}
                 <div>
                     <label className="text-lg text-gray-600 font-medium" htmlFor="">Title: </label>
                     <input value={title} onChange={(e) => setTitle(e.target.value)} type="text" className="p-2 lg:w-[300px] border-2 h-[42px] rounded-lg" />

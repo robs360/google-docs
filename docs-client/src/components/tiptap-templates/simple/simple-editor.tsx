@@ -44,7 +44,7 @@ export function SimpleEditor({ id }: { id: string }) {
   const toolbarRef = React.useRef<HTMLDivElement>(null)
   const [token, setToken] = useState<string | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-
+  const [share,setShare]=useState<any>([])
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
@@ -119,7 +119,7 @@ export function SimpleEditor({ id }: { id: string }) {
             timeout: 1500, // add a timeout to avoid silent hangs
           }
         );
-
+        
         setContent(response.data.document.content);
         if (editor && response.data.document.content) {
           editor.commands.setContent(response.data.document.content, false)
@@ -152,7 +152,7 @@ export function SimpleEditor({ id }: { id: string }) {
           email: user.email || "Anonymous",
           image: user.image || "https://via.placeholder.com/150"
         };
-        console.log('✅ Parsed user info:', userInfo);
+       
       } catch (error) {
         console.error("Failed to parse user data:", error);
       }
