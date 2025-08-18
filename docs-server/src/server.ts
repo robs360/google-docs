@@ -38,7 +38,6 @@ async function main() {
           documentUsers[documentId].push({ socketId: socket.id, image: user.image, email: user.email });
         }
 
-        // Broadcast current online users in this document
         io.to(documentId).emit('document-users', documentUsers[documentId]);
       });
       socket.on('disconnect', () => {
