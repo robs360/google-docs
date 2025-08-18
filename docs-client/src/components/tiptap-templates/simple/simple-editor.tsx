@@ -2,10 +2,7 @@
 
 import * as React from "react"
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react"
-
-// --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit"
-
 import { Image } from "@tiptap/extension-image"
 import { TaskItem } from "@tiptap/extension-task-item"
 import { TaskList } from "@tiptap/extension-task-list"
@@ -16,65 +13,38 @@ import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { Underline } from "@tiptap/extension-underline"
 import { useEffect, useState } from "react";
-// --- Custom Extensions ---
 import { Link } from "@/components/tiptap-extension/link-extension"
 import { Selection } from "@/components/tiptap-extension/selection-extension"
 import { TrailingNode } from "@/components/tiptap-extension/trailing-node-extension"
-
-// --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer"
-import {
-  Toolbar,
-  ToolbarGroup,
-  ToolbarSeparator,
-} from "@/components/tiptap-ui-primitive/toolbar"
-
-// --- Tiptap Node ---
+import { Toolbar,  ToolbarGroup,  ToolbarSeparator } from "@/components/tiptap-ui-primitive/toolbar"
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension"
 import "@/components/tiptap-node/code-block-node/code-block-node.scss"
 import "@/components/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss"
-
-// --- Tiptap UI ---
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu"
 import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button"
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu"
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button"
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button"
-import {
-  ColorHighlightPopover,
-  ColorHighlightPopoverContent,
-  ColorHighlightPopoverButton,
-} from "@/components/tiptap-ui/color-highlight-popover"
-import {
-  LinkPopover,
-  LinkContent,
-  LinkButton,
-} from "@/components/tiptap-ui/link-popover"
+import { ColorHighlightPopover, ColorHighlightPopoverContent,ColorHighlightPopoverButton,} from "@/components/tiptap-ui/color-highlight-popover"
+import {LinkPopover,LinkContent,LinkButton,} from "@/components/tiptap-ui/link-popover"
 import { MarkButton } from "@/components/tiptap-ui/mark-button"
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button"
-import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
-
-// --- Icons ---
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
-
-// --- Hooks ---
 import { useMobile } from "@/hooks/use-mobile"
 import { useWindowSize } from "@/hooks/use-window-size"
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
-
-// --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss"
 import axios from "axios"
 import { saveDocs } from "@/utils/saveDocs"
 import { getSocket } from "@/utils/socket"
-
-
+import { OnlineUser } from "@/utils/types"
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -103,7 +73,6 @@ const MainToolbarContent = ({
       <ToolbarGroup>
         <MarkButton type="bold" />
         <MarkButton type="italic" />
-
         <MarkButton type="code" />
         <MarkButton type="underline" />
         {!isMobile ? (
@@ -113,8 +82,6 @@ const MainToolbarContent = ({
         )}
         {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
       </ToolbarGroup>
-
-
 
       <ToolbarSeparator />
 
@@ -134,8 +101,6 @@ const MainToolbarContent = ({
       <Spacer />
 
       {isMobile && <ToolbarSeparator />}
-
-
     </>
   )
 }
@@ -168,11 +133,7 @@ const MobileToolbarContent = ({
     )}
   </>
 )
-interface OnlineUser {
-  socketId: string;
-  email: string;
-  image: string;
-}
+
 export function SimpleEditor({ id }: { id: string }) {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null
   const [content, setContent] = useState<any>(null);
@@ -184,11 +145,10 @@ export function SimpleEditor({ id }: { id: string }) {
   const toolbarRef = React.useRef<HTMLDivElement>(null)
   const [token, setToken] = useState<string | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-
     setToken(storedToken);
-
   }, []);
 
   const editor = useEditor({
@@ -237,12 +197,10 @@ export function SimpleEditor({ id }: { id: string }) {
     const storedToken = localStorage.getItem("token");
 
     if (!id || !storedToken) {
-
       return;
     }
 
     const fetchContent = async () => {
-
       try {
         const response = await axios.get(
           `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/document/${id}`,
@@ -254,46 +212,83 @@ export function SimpleEditor({ id }: { id: string }) {
           }
         );
 
-
         setContent(response.data.document.content);
         if (editor && response.data.document.content) {
           editor.commands.setContent(response.data.document.content, false)
         }
 
       } catch (error: any) {
-
         setContent({ type: "doc", content: [] });
       }
     };
 
     fetchContent();
-  }, [id, token]);
+  }, [id, token, editor]);
 
   useEffect(() => {
     if (!id) return;
 
     const socket = getSocket();
 
-    let userInfo = { name: "Anonymous", image: "https://via.placeholder.com/150" };
+    let userInfo = { 
+      email: "Anonymous", 
+      image: "https://via.placeholder.com/150/cccccc/666666?text=A" 
+    };
+    
     const userData = localStorage.getItem("user");
 
     if (userData) {
       try {
         const user = JSON.parse(userData);
-        userInfo = { name: user.email || "Anonymous", image: user.image || "https://via.placeholder.com/150" };
+        userInfo = { 
+          email: user.email || "Anonymous", 
+          image: user.image || "https://via.placeholder.com/150" 
+        };
+        console.log('✅ Parsed user info:', userInfo);
       } catch (error) {
         console.error("Failed to parse user data:", error);
       }
     }
-    socket.emit('join-document', { documentId: id, user: userInfo });
 
-    socket.on('document-users', (users: OnlineUser[]) => {
+    const joinDocument = () => {
+      socket.emit('join-document', { documentId: id, user: userInfo });
+    };
+   
+    const handleDocumentUsers = (users: OnlineUser[]) => {
       setOnlineUsers(users);
-    });
+    };
+
+    const handleConnect = () => {
+      joinDocument();
+    };
+
+    const handleDisconnect = () => {
+      setOnlineUsers([]);
+    };
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+    socket.on('document-users', handleDocumentUsers);
+
+    if (socket.connected) {
+      joinDocument();
+    } else {
+      console.log('🟡 Socket not connected, waiting for connection...');
+    }
+
     return () => {
-      socket.disconnect();
+      
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+      socket.off('document-users', handleDocumentUsers);
+      
+      if (socket.connected) {
+        socket.emit('leave-document', { documentId: id, user: userInfo });
+      }
+      
     };
   }, [id]);
+
   const bodyRect = useCursorVisibility({
     editor,
     overlayHeight: toolbarRef.current?.getBoundingClientRect().height ?? 0,
@@ -306,22 +301,38 @@ export function SimpleEditor({ id }: { id: string }) {
   }, [isMobile, mobileView])
 
   if (!content) return <p className="text-center">Loading.....</p>
-  
+
   return (
     <div>
-      <div>
-        {
-          onlineUsers.map((user) => (
-            <img
-              key={user.email} // It's good practice to use a unique key, like the user's email
-              src={user.image}
-              className="rounded-full h-8 w-8 object-cover"
-              alt={user.email}
-              title={user.email}
-            />
-          ))
-        }
+      {/* Online Users Display */}
+      <div className="flex items-center gap-2 p-3">
+        {onlineUsers.length > 0 && (
+          <>
+           
+            {onlineUsers.map((user, index) => (
+              <div key={`${user.socketId}-${user.email}`} className="relative group">
+                <img
+                  src={user.image}
+                  className="rounded-full h-9 w-9 object-cover border-2 border-green-500 shadow-sm"
+                  alt={user.email}
+                  title={user.email}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "https://via.placeholder.com/36/cccccc/666666?text=" + user.email.charAt(0).toUpperCase();
+                  }}
+                />
+                {/* Tooltip */}
+                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                  {user.email}
+                </div>
+                {/* Online indicator */}
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
+
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
           ref={toolbarRef}
