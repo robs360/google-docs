@@ -32,7 +32,6 @@ import { getSocket } from "@/utils/socket"
 import { OnlineUser } from "@/utils/types"
 import { MainToolbarContent, MobileToolbarContent } from "@/components/MainToolbarContent"
 
-
 export function SimpleEditor({ id }: { id: string }) {
   let saveTimeout: ReturnType<typeof setTimeout> | null = null
   const [content, setContent] = useState<any>(null);
@@ -44,12 +43,11 @@ export function SimpleEditor({ id }: { id: string }) {
   const toolbarRef = React.useRef<HTMLDivElement>(null)
   const [token, setToken] = useState<string | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [share,setShare]=useState<any>([])
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
   }, []);
-
   const editor = useEditor({
     immediatelyRender: false,
     editorProps: {
@@ -85,7 +83,7 @@ export function SimpleEditor({ id }: { id: string }) {
       setContent(updatedContent)
 
       const socket = getSocket()
-      if (socket.connected) { 
+      if (socket.connected) {
         socket.emit('send-changes', {
           documentId: id,
           content: updatedContent
@@ -119,7 +117,8 @@ export function SimpleEditor({ id }: { id: string }) {
             timeout: 1500, // add a timeout to avoid silent hangs
           }
         );
-        
+        console.log(response.data.document.shareWith)
+      
         setContent(response.data.document.content);
         if (editor && response.data.document.content) {
           editor.commands.setContent(response.data.document.content, false)
@@ -152,7 +151,7 @@ export function SimpleEditor({ id }: { id: string }) {
           email: user.email || "Anonymous",
           image: user.image || "https://via.placeholder.com/150"
         };
-       
+      
       } catch (error) {
         console.error("Failed to parse user data:", error);
       }
@@ -174,13 +173,13 @@ export function SimpleEditor({ id }: { id: string }) {
       setOnlineUsers([]);
     };
 
-   socket.on('receive-changes', (newContent: any) => {
-    if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(newContent)) {
-      editor.commands.setContent(newContent, false); 
-      console.log("frontend reciving changes ", newContent)
-      setContent(newContent); 
-    }
-  })
+    socket.on('receive-changes', (newContent: any) => {
+      if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(newContent)) {
+        editor.commands.setContent(newContent, false);
+        console.log("frontend reciving changes ", newContent)
+        setContent(newContent);
+      }
+    })
 
     socket.on('connect', handleConnect);
     socket.on('disconnect', handleDisconnect);
@@ -201,7 +200,6 @@ export function SimpleEditor({ id }: { id: string }) {
       if (socket.connected) {
         socket.emit('leave-document', { documentId: id, user: userInfo });
       }
-
     };
   }, [id, editor]);
 

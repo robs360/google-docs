@@ -23,16 +23,21 @@ const RegisterForm = () => {
             if (data.image) {
                 imageUrl = await uploadImageToImgBB(data.image);
             }
-           
+
             const result = await registerUser({
                 name: data.name,
                 email: data.email,
                 password: data.password,
                 image: imageUrl
             });
-            console.log("it is result ",result)
+            console.log("it is result ", result)
             if (result.success) {
-                router.push('/login');
+                localStorage.setItem("token", result.token);
+                localStorage.setItem("user", JSON.stringify(result.user));
+
+                setTimeout(() => {
+                    router.push('/');
+                }, 1500);
             } else {
                 throw new Error(result.error);
             }

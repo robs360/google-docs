@@ -1,28 +1,41 @@
 import { RequestHandler } from "express";
 import { userModel } from "./user.model";
 import { userServices } from "./user.services";
-
+import jwt from 'jsonwebtoken';
 const createUser: RequestHandler = async (req, res) => {
     try {
         const userData = req.body
-        console.log(userData)
+
         const existingUser = await userModel.findOne({ email: userData.email });
 
         if (existingUser) {
-            console.log("hello user has")
+
             res.status(400).json({
                 success: false,
                 message: "Email already used",
             });
         }
         else {
-           
+
             const result = await userServices.createUserIntoDB(userData);
-            console.log("hello ok")
+            let token = '';
+            if (result) {
+                token = jwt.sign(
+                    { name: result.name, image: result.image, email: result.email },
+                    process.env.JWT_SECRET as string,
+                    { expiresIn: '7d' }
+                );
+            }
             res.status(200).json({
                 success: true,
                 message: "User created successfully",
-                data: result,
+                user: {
+                    id: result._id,
+                    name: result.name,
+                    email: result.email,
+                    image: result.image
+                },
+                token: token
             });
         }
     } catch (error) {
@@ -39,7 +52,7 @@ const loginUser: RequestHandler = async (req, res) => {
     try {
         const userData = req.body;
         const result = await userServices.loginuserIntoDB(userData);
-        
+
         if (result.success) {
             res.status(200).json(result);
         } else {
@@ -54,5 +67,5 @@ const loginUser: RequestHandler = async (req, res) => {
     }
 };
 export const userController = {
-    createUser,loginUser
+    createUser, loginUser
 }
