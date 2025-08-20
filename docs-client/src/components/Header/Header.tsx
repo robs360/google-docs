@@ -7,7 +7,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ setOpenSiderbar }) => {
 
     return (
-        <header className="bg-white border-gray-200 py-3 shadow-sm">
+        <header className="py-3 shadow-sm">
             <div className="flex items-center justify-between">
                 
                 {/* Left - Menu Icon */}

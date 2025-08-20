@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
 export default function Home() {
-  const [token,setToken]=useState('')
-  const router=useRouter()
- useEffect(() => {
+  const [token, setToken] = useState('')
+  const router = useRouter()
+  useEffect(() => {
     const storedToken = localStorage.getItem("token");
 
     if (!storedToken) {
@@ -22,7 +22,7 @@ export default function Home() {
     return null; // or a loading spinner
   }
   return (
-    <div className="p-3">
+    <div>
       <CreateDocs></CreateDocs>
       <div className="mt-12">
         <AllDocs></AllDocs>
